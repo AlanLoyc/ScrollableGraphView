@@ -224,6 +224,10 @@ open class Plot {
     internal func graphPoint(forIndex index: Int) -> GraphPoint {
         return graphPoints[index]
     }
+
+    internal func allGraphPoints() -> [GraphPoint] {
+        return graphPoints
+    }
 }
 
 @objc public enum ScrollableGraphViewAnimationType : Int {
