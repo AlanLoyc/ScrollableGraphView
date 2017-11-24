@@ -34,6 +34,9 @@ open class ReferenceLines {
     @IBInspectable open var shouldAddLabelsToIntermediateReferenceLines: Bool = true
     /// Whether or not to add units specified by the referenceLineUnits variable to the labels on the intermediate reference lines.
     @IBInspectable open var shouldAddUnitsToIntermediateReferenceLineLabels: Bool = false
+
+    /// Whether or not to draw reference lines start with labels
+    @IBInspectable open var shouldDrawReferenceLinesStartFromLabels: Bool = true
     
     // Reference Line Labels
     // #####################
