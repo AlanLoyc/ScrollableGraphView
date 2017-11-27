@@ -82,6 +82,16 @@ import UIKit
 
     var targetLine: UIView? = nil
     var targetDot: UIView? = nil
+    var currentTargetIndexDidChangeNotification = Notification(name: Notification.Name(rawValue: "currentTargetIndexDidChangeNotification"))
+
+    var currentTargetIndex: Int? = nil {
+        didSet { if (oldValue != currentTargetIndex) {
+            NotificationCenter.default.post(
+                name: currentTargetIndexDidChangeNotification.name,
+                object: currentTargetIndex)
+            }
+        }
+    }
     var targetDotRefreshTimer: Timer? = nil
     // MARK: - Private State
     // #####################
@@ -785,6 +795,10 @@ import UIKit
 
                         return pointRect.contains(targetLineCentre)
                     }).first
+
+                    if let temp = targetPoint {
+                        self.currentTargetIndex = plot.allGraphPoints().enumerated().filter({ return temp.x == $0.element.x }).map({ $0.offset }).first
+                    }
                 }
             }
         }
