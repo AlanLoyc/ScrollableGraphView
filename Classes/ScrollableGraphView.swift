@@ -65,6 +65,8 @@ import UIKit
     @IBInspectable open var targetLineIdentifier: String = "multiBlue"
 
     @IBInspectable open var targetLineOffset = CGFloat(0.5)
+    @IBInspectable open var targetLineColor = UIColor.gray
+    @IBInspectable open var targetLineWidth = CGFloat(4)
     @IBInspectable open var targetDotSize = CGSize(width: 24, height: 24)
     @IBInspectable open var targetDotBorderWidth = CGFloat(3.0)
     @IBInspectable open var targetDotBorderColor = UIColor.blue
@@ -335,11 +337,11 @@ import UIKit
         if (shouldShowTargetLine) {
             var frame = CGRect()
             frame.origin.x = viewportWidth * self.targetLineOffset
-            frame.size.width = 4
+            frame.size.width = self.targetLineWidth
             frame.size.height = viewportHeight
 
             let targetLine = UIView(frame: frame)
-            targetLine.backgroundColor = UIColor.gray
+            targetLine.backgroundColor = self.targetLineColor
             targetLine.clipsToBounds = false
 
             let targetDot = UIView(frame: .init(x: frame.width * 0.5 - targetDotSize.width * 0.5,
