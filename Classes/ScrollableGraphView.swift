@@ -62,7 +62,13 @@ import UIKit
 
     /// Whether or noth the graph should a target line in middle
     @IBInspectable open var shouldShowTargetLine: Bool = true
-    @IBInspectable open var targetLineOffset: CGFloat = CGFloat(0.5)
+    @IBInspectable open var targetLineIdentifier: String = "multiBlue"
+
+    @IBInspectable open var targetLineOffset = CGFloat(0.5)
+    @IBInspectable open var targetDotSize = CGSize(width: 24, height: 24)
+    @IBInspectable open var targetDotBorderWidth = CGFloat(3.0)
+    @IBInspectable open var targetDotBorderColor = UIColor.blue
+    @IBInspectable open var targetDotBackgroundColor = UIColor.white
 
     // Reference Line Settings
     // #######################
@@ -73,7 +79,8 @@ import UIKit
     // ####################
 
     var targetLine: UIView? = nil
-
+    var targetDot: UIView? = nil
+    var targetDotRefreshTimer: Timer? = nil
     // MARK: - Private State
     // #####################
 
@@ -255,7 +262,11 @@ import UIKit
         }
 
         if (shouldShowTargetLine) {
-            self.contentInset = .init(top: 0, left: viewportWidth * targetLineOffset, bottom: 0, right: viewportWidth * (1 - targetLineOffset))
+            self.contentInset = .init(
+                top: 0,
+                left: viewportWidth * targetLineOffset - leftmostPointPadding + targetDotSize.width * 0.5,
+                bottom: 0,
+                right: viewportWidth * (1 - targetLineOffset) - leftmostPointPadding + targetDotSize.width * 0.5)
             addTargetViewLine()
         }
 
@@ -328,12 +339,22 @@ import UIKit
             frame.size.height = viewportHeight
 
             let targetLine = UIView(frame: frame)
-
             targetLine.backgroundColor = UIColor.gray
+            targetLine.clipsToBounds = false
 
+            let targetDot = UIView(frame: .init(x: frame.width * 0.5 - targetDotSize.width * 0.5,
+                                                y: 100 - targetDotSize.height * 0.5,
+                                                width: targetDotSize.width,
+                                                height: targetDotSize.height))
+            targetDot.layer.cornerRadius = targetDotSize.height * 0.5
+            targetDot.layer.borderColor = targetDotBorderColor.cgColor
+            targetDot.layer.borderWidth = targetDotBorderWidth
+            targetDot.backgroundColor = targetDotBackgroundColor
+
+            targetLine.addSubview(targetDot)
             self.superview?.addSubview(targetLine)
-
             self.targetLine = targetLine
+            self.targetDot = targetDot
         }
     }
 
@@ -378,6 +399,8 @@ import UIKit
 
             // We're done setting up.
             isInitialSetup = false
+            updateTargetDot()
+            updateTargetLine()
         }
         // Otherwise, the user is just scrolling and we just need to update everything.
             else {
@@ -462,8 +485,39 @@ import UIKit
         }
     }
 
-    // MARK: - Public Methods
-    // ######################
+    private func updateTargetDot() {
+        if #available(iOS 10.0, *) {
+            if let targetDot = self.targetDot {
+                if self.targetDotRefreshTimer != nil {
+                    self.targetDotRefreshTimer?.invalidate()
+                }
+
+                self.targetDotRefreshTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false, block: { [weak self] (_) in
+                    if let targetPoint = self?.targetPoint {
+
+                        var dotFrame = targetDot.frame
+                        dotFrame.origin.y = targetPoint.location.y - targetDot.frame.size.height * 0.5
+
+                        targetDot.frame = dotFrame
+                    }
+
+                    targetDot.alpha = 1
+                })
+            }
+        }
+    }
+
+    private func updateTargetLine() {
+        if let targetPoint = self.targetPoint, let targetLine = self.targetLine {
+            let targetOffset = CGPoint.init(
+                x: targetPoint.location.x - targetLine.center.x,
+                y: contentOffset.y)
+            contentOffset = targetOffset
+        }
+    }
+
+// MARK: - Public Methods
+// ######################
 
     public func addPlot(plot: Plot) {
         // If we aren't setup yet, save the plot to be added during setup.
@@ -488,7 +542,7 @@ import UIKit
         }
     }
 
-    // Limitation: Can only be used when reloading the same number of data points!
+// Limitation: Can only be used when reloading the same number of data points!
     public func reload() {
         stopAnimations()
         rangeDidChange()
@@ -497,14 +551,14 @@ import UIKit
         updateLabelsForCurrentInterval()
     }
 
-    // The functions for adding plots and reference lines need to be able to add plots
-    // both before and after the graph knows its viewport/size.
-    // This needs to be the case so we can use it in interface builder as well as
-    // just adding it programatically.
-    // These functions add the plots and reference lines to the graph.
-    // The public functions will either save the plots and reference lines (in the case
-    // don't have the required viewport information) or add it directly to the graph
-    // (the case where we already know the viewport information).
+// The functions for adding plots and reference lines need to be able to add plots
+// both before and after the graph knows its viewport/size.
+// This needs to be the case so we can use it in interface builder as well as
+// just adding it programatically.
+// These functions add the plots and reference lines to the graph.
+// The public functions will either save the plots and reference lines (in the case
+// don't have the required viewport information) or add it directly to the graph
+// (the case where we already know the viewport information).
     private func addPlotToGraph(plot: Plot, activePointsInterval: CountableRange<Int>) {
         plot.graphViewDrawingDelegate = self
         self.plots.append(plot)
@@ -543,11 +597,11 @@ import UIKit
     }
 
 
-    // MARK: - Private Methods
-    // #######################
+// MARK: - Private Methods
+// #######################
 
-    // MARK: Layout Calculations
-    // #########################
+// MARK: Layout Calculations
+// #########################
 
     private func calculateActivePointsInterval() -> CountableRange<Int> {
 
@@ -571,7 +625,7 @@ import UIKit
         return actualMin..<actualMax.advanced(by: 1)
     }
 
-    // Calculate the range across all plots.
+// Calculate the range across all plots.
     private func calculateRange(forActivePointsInterval interval: CountableRange<Int>) -> (min: Double, max: Double) {
 
         // This calculates the range across all plots for the active points.
@@ -614,7 +668,7 @@ import UIKit
         return min
     }
 
-    // Calculate the range for a single plot.
+// Calculate the range for a single plot.
     private func calculateRange(forPlot plot: Plot, forActivePointsInterval interval: CountableRange<Int>) -> (min: Double, max: Double) {
 
         let dataForActivePoints = getData(forPlot: plot, andActiveInterval: interval)
@@ -713,10 +767,33 @@ import UIKit
         return dataForActivatedPoints
     }
 
-    // MARK: Events
-    // ############
+    private var targetPoint: GraphPoint? {
+        var targetPoint: GraphPoint?
+        if let targetLine = self.targetLine {
+            let targetLineCentre = self.convert(targetLine.center, from: targetLine.superview)
+            for plot in self.plots {
+                if plot.identifier == self.targetLineIdentifier {
 
-    // If the active points (the points we can actually see) change, then we need to update the path.
+                    targetPoint = plot.allGraphPoints().filter({ (point) -> Bool in
+                        var pointRect = CGRect()
+                        pointRect.origin.x = point.x - self.dataPointSpacing * 0.5
+                        pointRect.origin.y = contentOffset.y
+                        pointRect.size.width = self.dataPointSpacing
+                        pointRect.size.height = self.viewportHeight
+
+                        return pointRect.contains(targetLineCentre)
+                    }).first
+                }
+            }
+        }
+
+        return targetPoint
+    }
+
+// MARK: Events
+// ############
+
+// If the active points (the points we can actually see) change, then we need to update the path.
     private func activePointsDidChange() {
 
         let deactivatedPoints = determineDeactivatedPoints()
@@ -782,31 +859,28 @@ import UIKit
         }
     }
 
-    public func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
-        var contentOffset = scrollView.convert(self.targetLine!.center, from: self.targetLine!.superview)
-
-        for plot in plots {
-            if plot.identifier == "multiBlue" {
-                for point in plot.allGraphPoints() {
-                    var pointRect = CGRect()
-                    pointRect.origin.x = point.x - dataPointSpacing * 0.5
-                    pointRect.origin.y = contentOffset.y
-                    pointRect.size.width = dataPointSpacing
-                    pointRect.size.height = viewportHeight
-
-                    if pointRect.contains(contentOffset) {
-                        let targetOffset = CGPoint.init(
-                            x: point.location.x - self.targetLine!.center.x,
-                            y: targetContentOffset.pointee.y)
-                        targetContentOffset.pointee = targetOffset
-                    }
-                }
-            }
+    public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        if let targetDot = self.targetDot {
+            UIView.animate(withDuration: 0.3, animations: {
+                targetDot.alpha = 0
+            })
         }
-
     }
 
-    // Returns the indices of any points that became inactive (that is, "off screen"). (No order)
+    public func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        if let targetLine = self.targetLine {
+            updateTargetDot()
+
+            if let targetPoint = self.targetPoint {
+                let targetOffset = CGPoint.init(
+                    x: targetPoint.location.x - targetLine.center.x,
+                    y: targetContentOffset.pointee.y)
+                targetContentOffset.pointee = targetOffset
+            }
+        }
+    }
+
+// Returns the indices of any points that became inactive (that is, "off screen"). (No order)
     private func determineDeactivatedPoints() -> [Int] {
         let prevSet = Set(previousActivePointsInterval)
         let currSet = Set(activePointsInterval)
@@ -816,7 +890,7 @@ import UIKit
         return Array(deactivatedPoints)
     }
 
-    // Returns the indices of any points that became active (on screen). (No order)
+// Returns the indices of any points that became active (on screen). (No order)
     private func determineActivatedPoints() -> [Int] {
         let prevSet = Set(previousActivePointsInterval)
         let currSet = Set(activePointsInterval)
@@ -826,7 +900,7 @@ import UIKit
         return Array(activatedPoints)
     }
 
-    // Animations
+// Animations
 
     private func startAnimations(withStaggerValue stagger: Double = 0) {
         var pointsToAnimate = 0 ..< 0
@@ -849,10 +923,10 @@ import UIKit
         }
     }
 
-    // Labels
-    // TODO in 4.1: refactor all label adding & positioning code.
+// Labels
+// TODO in 4.1: refactor all label adding & positioning code.
 
-    // Update any labels for any new points that have been activated and deactivated.
+// Update any labels for any new points that have been activated and deactivated.
     private func updateLabels(deactivatedPoints: [Int], activatedPoints: [Int]) {
 
         guard let ref = self.referenceLines else {
@@ -930,8 +1004,8 @@ import UIKit
         return points.filter({ $0 % ref.dataPointLabelsSparsity == 0 })
     }
 
-    // MARK: - Drawing Delegate
-    // ########################
+// MARK: - Drawing Delegate
+// ########################
 
     internal func calculatePosition(atIndex index: Int, value: Double) -> CGPoint {
 
@@ -981,7 +1055,7 @@ import UIKit
         return CGRect(x: 0, y: 0, width: viewportWidth, height: viewportHeight)
     }
 
-    // Update any paths with the new path based on visible data points.
+// Update any paths with the new path based on visible data points.
     internal func updatePaths() {
 
         zeroYPosition = calculatePosition(atIndex: 0, value: self.range.min).y
