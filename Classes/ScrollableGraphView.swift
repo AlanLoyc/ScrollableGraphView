@@ -60,6 +60,8 @@ import UIKit
     /// Whether or not the graph should animate to their positions when the graph is first displayed.
     @IBInspectable open var shouldAnimateOnStartup: Bool = true
 
+    @IBInspectable open var shouldReferenceLineShowAsBackgroundView: Bool = true
+
     /// Whether or noth the graph should a target line in middle
     @IBInspectable open var shouldShowTargetLine: Bool = true
     @IBInspectable open var targetLineIdentifier: String = "multiBlue"
@@ -89,7 +91,7 @@ import UIKit
             NotificationCenter.default.post(
                 name: currentTargetIndexDidChangeNotification.name,
                 object: currentTargetIndex)
-            }
+        }
         }
     }
     var targetDotRefreshTimer: Timer? = nil
@@ -201,7 +203,14 @@ import UIKit
 
         // Add the drawing view in which we draw all the plots.
         drawingView = UIView(frame: viewport)
-        drawingView.backgroundColor = backgroundFillColor
+
+        if shouldReferenceLineShowAsBackgroundView == true {
+            self.backgroundColor = backgroundFillColor
+            drawingView.backgroundColor = .clear
+        } else {
+            drawingView.backgroundColor = backgroundFillColor
+        }
+
         self.addSubview(drawingView)
 
         // Add the x-axis labels view.
@@ -335,7 +344,11 @@ import UIKit
 
             referenceLineView?.set(range: self.range)
 
-            self.addSubview(referenceLineView!)
+            if shouldReferenceLineShowAsBackgroundView {
+                self.insertSubview(referenceLineView!, at: 0)
+            } else {
+                self.addSubview(referenceLineView!)
+            }
         }
     }
 
