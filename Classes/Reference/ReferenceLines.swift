@@ -28,8 +28,10 @@ open class ReferenceLines {
     @IBInspectable open var positionType = ReferenceLinePositioningType.relative
     @IBInspectable open var relativePositions: [Double] = [0.25, 0.5, 0.75]
     @IBInspectable open var absolutePositions: [Double] = [25, 50, 75]
-    @IBInspectable open var includeMin: Bool = false
-    @IBInspectable open var includeMax: Bool = false
+    @IBInspectable open var includeMin: Bool = true
+    @IBInspectable open var includeMax: Bool = true
+    @IBInspectable open var includeMinLabel: Bool = true
+    @IBInspectable open var includeMaxLabel: Bool = true
     
     /// Whether the reference labels are rendered in a separated view, i.e. possible to avoid line overlapping with the labels
     @IBInspectable open var shouldDrawReferenceLabelsSeparately: Bool = true
