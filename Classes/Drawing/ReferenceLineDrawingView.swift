@@ -73,19 +73,22 @@ internal class ReferenceLineDrawingView: UIView {
         }
         labels.removeAll()
 
-        if(self.settings.includeMinMax) {
-            let maxLineStart = CGPoint(x: 0, y: topMargin)
-            let maxLineEnd = CGPoint(x: lineWidth, y: topMargin)
-
-            let minLineStart = CGPoint(x: 0, y: self.bounds.height - bottomMargin)
-            let minLineEnd = CGPoint(x: lineWidth, y: self.bounds.height - bottomMargin)
-
+        if(self.settings.includeMax) {
             let numberFormatter = referenceNumberFormatter()
 
+            let maxLineStart = CGPoint(x: 0, y: topMargin)
+            let maxLineEnd = CGPoint(x: lineWidth, y: topMargin)
             let maxString = numberFormatter.string(from: self.currentRange.max as NSNumber)! + units
-            let minString = numberFormatter.string(from: self.currentRange.min as NSNumber)! + units
 
             addLine(withTag: maxString, from: maxLineStart, to: maxLineEnd, in: referenceLinePath)
+        }
+
+        if(self.settings.includeMin) {
+            let numberFormatter = referenceNumberFormatter()
+            let minLineStart = CGPoint(x: 0, y: self.bounds.height - bottomMargin)
+            let minLineEnd = CGPoint(x: lineWidth, y: self.bounds.height - bottomMargin)
+            let minString = numberFormatter.string(from: self.currentRange.min as NSNumber)! + units
+
             addLine(withTag: minString, from: minLineStart, to: minLineEnd, in: referenceLinePath)
         }
 
@@ -116,9 +119,15 @@ internal class ReferenceLineDrawingView: UIView {
         var relativePositions = relativePositions
 
         // If we are including the min and max already need to make sure we don't redraw them.
-        if(self.settings.includeMinMax) {
+        if(self.settings.includeMin || self.settings.includeMax) {
             relativePositions = relativePositions.filter({ (x: Double) -> Bool in
-                return (x != 0 && x != 1)
+                if(settings.includeMin && settings.includeMax) {
+                    return (x != 0 && x != 1)
+                } else if(settings.includeMin) {
+                    return x != 0
+                } else {
+                    return x != 1
+                }
             })
         }
 

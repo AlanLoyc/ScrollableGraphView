@@ -56,8 +56,11 @@ class ReferenceLabelView: UIView {
 
         let labelFrame = CGRect(x: 0, y: topMargin, width: self.frame.width, height: self.bounds.size.height - (topMargin + bottomMargin))
 
-        if (self.settings.includeMinMax) {
+        if self.settings.includeMin {
             createLabel(atPosition: self.bounds.size.height - bottomMargin)
+        }
+
+        if self.settings.includeMax {
             createLabel(atPosition: topMargin)
         }
 
@@ -76,9 +79,15 @@ class ReferenceLabelView: UIView {
         var relativePositions = relativePositions
 
         // If we are including the min and max already need to make sure we don't redraw them.
-        if (self.settings.includeMinMax) {
+        if(self.settings.includeMin || self.settings.includeMax) {
             relativePositions = relativePositions.filter({ (x: Double) -> Bool in
-                return (x != 0 && x != 1)
+                if(settings.includeMin && settings.includeMax) {
+                    return (x != 0 && x != 1)
+                } else if(settings.includeMin) {
+                    return x != 0
+                } else {
+                    return x != 1
+                }
             })
         }
 
