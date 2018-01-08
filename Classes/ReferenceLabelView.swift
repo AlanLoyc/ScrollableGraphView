@@ -26,8 +26,8 @@ class ReferenceLabelView: UIView {
     init(frame: CGRect, referenceLineSettings: ReferenceLines, topMargin: CGFloat, bottomMargin: CGFloat) {
         super.init(frame: frame)
 
-        self.topMargin = topMargin
-        self.bottomMargin = bottomMargin
+        self.topMargin = topMargin + self.settings.referenceLineThickness
+        self.bottomMargin = bottomMargin  + self.settings.referenceLineThickness
 
         self.settings = referenceLineSettings
 
@@ -39,7 +39,7 @@ class ReferenceLabelView: UIView {
     }
 
     private func setup() {
-        let viewWidth = self.maxViewWidth()
+        let viewWidth = self.maxLabelSize().width
         let viewStart = self.frame.width - viewWidth
 
         let frame = CGRect(x: viewStart, y: self.bounds.origin.y, width: viewWidth, height: self.bounds.size.height)
@@ -133,10 +133,10 @@ class ReferenceLabelView: UIView {
         return (text as NSString).size(withAttributes: [NSAttributedStringKey.font: self.settings.referenceLineLabelFont])
     }
 
-    private func maxViewWidth() -> CGFloat {
+    private func maxLabelSize() -> CGSize {
         var dummyString = String.init(repeating: "9", count: (maxDecimalDigit + maxFloatingDigit))
         dummyString.append(".")
-        return self.boundingSize(forText: dummyString).width
+        return self.boundingSize(forText: dummyString)
     }
 
     private func referenceNumberFormatter() -> NumberFormatter {
