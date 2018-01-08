@@ -134,6 +134,8 @@ import UIKit
         }
     }
 
+    private var referenceLabelView: ReferenceLabelView?
+
     // Active Points & Range Calculation
     private var previousActivePointsInterval: CountableRange<Int> = -1 ..< -1
     private var activePointsInterval: CountableRange<Int> = -1 ..< -1 {
@@ -349,6 +351,17 @@ import UIKit
             } else {
                 self.addSubview(referenceLineView!)
             }
+
+            if referenceLines.shouldDrawReferenceLabelsSeparately {
+                referenceLabelView = ReferenceLabelView(frame: viewport,
+                                                        referenceLineSettings: referenceLines,
+                                                        topMargin: topMargin,
+                                                        bottomMargin: referenceLineBottomMargin)
+                referenceLabelView?.backgroundColor = referenceLines.referenceLabelViewBackgroundColor
+                referenceLabelView?.set(range: self.range)
+
+                self.superview?.addSubview(referenceLabelView!)
+            }
         }
     }
 
@@ -490,6 +503,7 @@ import UIKit
 
         // Reference lines should extend over the entire viewport
         referenceLineView?.set(viewportWidth: viewportWidth, viewportHeight: viewportHeight)
+        referenceLabelView?.set(viewportWidth: viewportWidth, viewportHeight: viewportHeight)
 
         self.contentSize.height = viewportHeight
     }
@@ -863,6 +877,7 @@ import UIKit
         }
 
         referenceLineView?.set(range: range)
+        referenceLabelView?.set(range: range)
     }
 
     private func viewportDidChange() {

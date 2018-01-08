@@ -201,8 +201,10 @@ internal class ReferenceLineDrawingView: UIView {
                 gaps.append((start: leftLabelStart.x, end: leftLabelEnd.x))
             }
 
-            self.addSubview(leftLabel)
-            self.labels.append(leftLabel)
+            if !self.settings.shouldDrawReferenceLabelsSeparately {
+                self.addSubview(leftLabel)
+                self.labels.append(leftLabel)
+            }
 
         case .right:
             if settings.shouldDrawReferenceLinesStartFromLabels {
@@ -210,8 +212,11 @@ internal class ReferenceLineDrawingView: UIView {
             } else {
                 gaps.append((start: rightLabelStart.x, end: rightLabelEnd.x))
             }
-            self.addSubview(rightLabel)
-            self.labels.append(rightLabel)
+
+            if !self.settings.shouldDrawReferenceLabelsSeparately {
+                self.addSubview(rightLabel)
+                self.labels.append(rightLabel)
+            }
 
         case .both:
             if settings.shouldDrawReferenceLinesStartFromLabels {
@@ -221,10 +226,13 @@ internal class ReferenceLineDrawingView: UIView {
                 gaps.append((start: leftLabelStart.x, end: leftLabelEnd.x))
                 gaps.append((start: rightLabelStart.x, end: rightLabelEnd.x))
             }
-            self.addSubview(leftLabel)
-            self.addSubview(rightLabel)
-            self.labels.append(leftLabel)
-            self.labels.append(rightLabel)
+
+            if !self.settings.shouldDrawReferenceLabelsSeparately {
+                self.addSubview(leftLabel)
+                self.addSubview(rightLabel)
+                self.labels.append(leftLabel)
+                self.labels.append(rightLabel)
+            }
         }
 
         addLine(from: from, to: to, withGaps: gaps, in: path)

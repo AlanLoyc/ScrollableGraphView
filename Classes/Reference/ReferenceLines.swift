@@ -30,6 +30,10 @@ open class ReferenceLines {
     @IBInspectable open var absolutePositions: [Double] = [25, 50, 75]
     @IBInspectable open var includeMinMax: Bool = true
     
+    /// Whether the reference labels are rendered in a separated view, i.e. possible to avoid line overlapping with the labels
+    @IBInspectable open var shouldDrawReferenceLabelsSeparately: Bool = true
+    @IBInspectable open var referenceLabelViewBackgroundColor: UIColor = UIColor.white
+
     /// Whether or not to add labels to the intermediate reference lines.
     @IBInspectable open var shouldAddLabelsToIntermediateReferenceLines: Bool = true
     /// Whether or not to add units specified by the referenceLineUnits variable to the labels on the intermediate reference lines.
@@ -38,6 +42,7 @@ open class ReferenceLines {
     /// Whether or not to draw reference lines start with labels
     @IBInspectable open var shouldDrawReferenceLinesStartFromLabels: Bool = true
     
+
     // Reference Line Labels
     // #####################
     
