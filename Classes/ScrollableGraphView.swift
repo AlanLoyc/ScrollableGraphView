@@ -293,12 +293,18 @@ import UIKit
         }
 
         if (shouldShowTargetLine) {
+            let leftOffset = viewportWidth * targetLineOffset - leftmostPointPadding + targetDotSize.width * 0.5
+            let rightOffset = viewportWidth * (1 - targetLineOffset) - leftmostPointPadding + targetDotSize.width * 0.5
+
             self.contentInset = .init(
                 top: 0,
-                left: viewportWidth * targetLineOffset - leftmostPointPadding + targetDotSize.width * 0.5,
+                left: leftOffset,
                 bottom: 0,
-                right: viewportWidth * (1 - targetLineOffset) - leftmostPointPadding + targetDotSize.width * 0.5)
+                right: rightOffset)
             addTargetViewLine()
+
+            let lastPointOffset = totalGraphWidth - viewportWidth + rightOffset
+            self.contentOffset.x = lastPointOffset
 
             if (shouldAnimateOnStartup) {
                 self.targetDot?.isHidden = true
@@ -1139,13 +1145,15 @@ import UIKit
     }
 
     internal func didFinishAnimation() {
-        let animatingPlots = plots.filter { $0.hasAnimationOngoing() }
+        if shouldShowTargetLine {
+            let animatingPlots = plots.filter { $0.hasAnimationOngoing() }
 
-        if animatingPlots.isEmpty {
-            updateTargetDot(delay: 0)
+            if animatingPlots.isEmpty {
+                updateTargetDot(delay: 0)
 
-            if self.targetDot?.isHidden ?? false {
-                self.targetDot?.isHidden = false
+                if self.targetDot?.isHidden ?? false {
+                    self.targetDot?.isHidden = false
+                }
             }
         }
     }
