@@ -19,6 +19,8 @@ class ReferenceLabelView: UIView {
     private var maxFloatingDigit: Int = 2
 
     var settings: ReferenceLines = ReferenceLines()
+
+    var containerView: UIView?
     var labels = [UILabel]()
 
     private var currentRange: (min: Double, max: Double) = (0, 100)
@@ -26,8 +28,8 @@ class ReferenceLabelView: UIView {
     init(frame: CGRect, referenceLineSettings: ReferenceLines, topMargin: CGFloat, bottomMargin: CGFloat) {
         super.init(frame: frame)
 
-        self.topMargin = topMargin + self.settings.referenceLineThickness
-        self.bottomMargin = bottomMargin  + self.settings.referenceLineThickness
+        self.topMargin = topMargin
+        self.bottomMargin = bottomMargin
 
         self.settings = referenceLineSettings
 
@@ -42,18 +44,37 @@ class ReferenceLabelView: UIView {
         let viewWidth = self.maxLabelSize().width
         let viewStart = self.frame.width - viewWidth
 
-        let frame = CGRect(x: viewStart, y: self.bounds.origin.y, width: viewWidth, height: self.bounds.size.height)
+        var frame = CGRect(x: viewStart, y: self.bounds.origin.y, width: viewWidth, height: self.bounds.size.height)
 
         self.frame = frame
+
+        frame.origin = CGPoint(x: 0, y: 0)
+
+        if let containerView = containerView {
+            containerView.removeFromSuperview()
+        }
+
+        containerView = UIView(frame: frame)
+        containerView?.backgroundColor = self.settings.referenceLabelViewBackgroundColor
+
+        self.addSubview(containerView!)
     }
 
     private func createLabels() {
 
+        // Remove all existing labels
         for label in labels {
             label.removeFromSuperview()
         }
         labels.removeAll()
 
+        // Reset containerView's frame
+        let containerSize = CGSize(width: self.frame.size.width,
+                                   height: self.frame.size.height - self.settings.referenceLineThickness * 2)
+        let containerFrame = CGRect(origin: CGPoint(x: 0, y: self.settings.referenceLineThickness), size: containerSize)
+        containerView?.frame = containerFrame
+
+        // Labels' frame is aligned to reference line's frame in ReferenceLineDrawingView
         let labelFrame = CGRect(x: 0, y: topMargin, width: self.frame.width, height: self.bounds.size.height - (topMargin + bottomMargin))
 
         if self.settings.includeMinLabel {
@@ -95,6 +116,8 @@ class ReferenceLabelView: UIView {
             let yPosition = height * CGFloat(1 - relativePosition) + rect.origin.y
             createLabel(atPosition: yPosition)
         }
+
+        updateContainerView()
     }
 
     private func createLabel(in rect: CGRect, atAbsolutePositions absolutePositions: [Double], forPath path: UIBezierPath) {
@@ -115,16 +138,34 @@ class ReferenceLabelView: UIView {
             let boundingSize = self.boundingSize(forText: valueString)
             let rightLabel = createLabel(withText: valueString)
 
+            let rightLabelY = atPosition - (boundingSize.height / 2) - self.settings.referenceLineThickness
             rightLabel.frame = CGRect(
-                origin: CGPoint(x: rightLabelInset, y: atPosition - (boundingSize.height / 2)),
+                origin: CGPoint(x: rightLabelInset, y: rightLabelY),
                 size: boundingSize)
 
             switch self.settings.referenceLinePosition {
             case .right:
                 labels.append(rightLabel)
-                self.addSubview(rightLabel)
+                containerView?.addSubview(rightLabel)
             default:
                 break
+            }
+        }
+    }
+
+    private func updateContainerView() {
+        if let containerView = self.containerView {
+
+            var containerFrame = containerView.frame
+            let labelHeight = maxLabelSize().height
+            let xAxisAdjust = self.settings.dataPointLabelTopMargin + self.settings.dataPointLabelBottomMargin + (self.settings.dataPointLabelFont?.pointSize ?? 0)
+
+            if !self.settings.includeMinLabel {
+                //let heightAdjust = labelHeight + xAxisAdjust + self.settings.referenceLineThickness
+                let heightAdjust = xAxisAdjust + labelHeight / 2
+                containerFrame.size.height -= heightAdjust
+
+                containerView.frame = containerFrame
             }
         }
     }
@@ -185,14 +226,16 @@ class ReferenceLabelView: UIView {
         return Double(value)
     }
 
+    // MARK:- Public methods
+
     func set(range: (min: Double, max: Double)) {
         self.currentRange = range
         self.createLabels()
     }
 
     func set(viewportWidth: CGFloat, viewportHeight: CGFloat) {
-        //self.frame.origin.x = viewportWidth - maxViewWidth()
-        //self.frame.size.width = viewportWidth
-        //self.frame.size.height = viewportHeight
+        self.frame.size.width = viewportWidth
+        self.frame.size.height = viewportHeight
+        setup()
     }
 }
