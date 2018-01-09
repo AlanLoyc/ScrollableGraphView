@@ -7,6 +7,7 @@ internal protocol ScrollableGraphViewDrawingDelegate {
     func rangeForActivePoints() -> (min: Double, max: Double)
     func paddingForPoints() -> (leftmostPointPadding: CGFloat, rightmostPointPadding: CGFloat)
     func calculatePosition(atIndex index: Int, value: Double) -> CGPoint
+    func calculatePosition(atIndex index: Int, value: Double, zeroValueOffset: Double) -> CGPoint
     func currentViewport() -> CGRect
     func updatePaths()
 }

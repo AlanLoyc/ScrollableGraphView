@@ -36,7 +36,7 @@ open class Plot {
     private var currentTimestamp: CFTimeInterval = 0
     
     private var graphPoints = [GraphPoint]()
-    
+
     deinit {
         displayLink?.invalidate()
     }
@@ -147,11 +147,15 @@ open class Plot {
     }
     
     internal func createPlotPoints(numberOfPoints: Int, range: (min: Double, max: Double)) {
+        createPlotPoints(numberOfPoints: numberOfPoints, range: range, zeroValueOffset: 0)
+    }
+
+    internal func createPlotPoints(numberOfPoints: Int, range: (min: Double, max: Double), zeroValueOffset: Double = 0) {
         for i in 0 ..< numberOfPoints {
             
             let value = range.min
             
-            let position = graphViewDrawingDelegate.calculatePosition(atIndex: i, value: value)
+            let position = graphViewDrawingDelegate.calculatePosition(atIndex: i, value: value, zeroValueOffset: zeroValueOffset)
             let point = GraphPoint(position: position)
             graphPoints.append(point)
         }
@@ -235,11 +239,3 @@ open class Plot {
     case elastic
     case custom
 }
-
-
-
-
-
-
-
-

@@ -280,7 +280,7 @@ class ViewController: UIViewController, ScrollableGraphViewDataSource {
         referenceLines.positionType = .absolute
         // Reference lines will be shown at these values on the y-axis.
         referenceLines.absolutePositions = [10, 20, 25, 30]
-        referenceLines.includeMinMax = false
+        //referenceLines.includeMinMax = false
         
         referenceLines.dataPointLabelColor = UIColor.white.withAlphaComponent(0.5)
         

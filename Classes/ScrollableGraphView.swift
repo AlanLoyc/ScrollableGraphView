@@ -252,7 +252,12 @@ import UIKit
 
         while(queuedPlots.count > 0) {
             if let plot = queuedPlots.dequeue() {
-                addPlotToGraph(plot: plot, activePointsInterval: initialActivePointsInterval)
+                if let linePlot = plot as? LinePlot, isInitialSetup && shouldAnimateOnStartup {
+                    let zeroValueOffset = Double(linePlot.lineWidth)
+                    addPlotToGraph(plot: plot, activePointsInterval: initialActivePointsInterval, zeroValueOffset: zeroValueOffset)
+                } else {
+                    addPlotToGraph(plot: plot, activePointsInterval: initialActivePointsInterval)
+                }
             }
         }
 
@@ -357,7 +362,6 @@ import UIKit
                                                         referenceLineSettings: referenceLines,
                                                         topMargin: topMargin,
                                                         bottomMargin: referenceLineBottomMargin)
-                referenceLabelView?.backgroundColor = referenceLines.referenceLabelViewBackgroundColor
                 referenceLabelView?.set(range: self.range)
 
                 self.superview?.addSubview(referenceLabelView!)
@@ -598,12 +602,14 @@ import UIKit
 // The public functions will either save the plots and reference lines (in the case
 // don't have the required viewport information) or add it directly to the graph
 // (the case where we already know the viewport information).
-    private func addPlotToGraph(plot: Plot, activePointsInterval: CountableRange<Int>) {
+    private func addPlotToGraph(plot: Plot, activePointsInterval: CountableRange<Int>, zeroValueOffset: Double = 0) {
         plot.graphViewDrawingDelegate = self
         self.plots.append(plot)
-        initPlot(plot: plot, activePointsInterval: activePointsInterval)
+        initPlot(plot: plot, activePointsInterval: activePointsInterval, zeroValueOffset: zeroValueOffset)
         startAnimations(withStaggerValue: 0.15)
     }
+
+
 
     private func addReferenceLinesToGraph(referenceLines: ReferenceLines) {
         self.referenceLines = referenceLines
@@ -613,12 +619,16 @@ import UIKit
     }
 
     private func initPlot(plot: Plot, activePointsInterval: CountableRange<Int>) {
+        initPlot(plot: plot, activePointsInterval: activePointsInterval, zeroValueOffset: 0)
+    }
+
+    private func initPlot(plot: Plot, activePointsInterval: CountableRange<Int>, zeroValueOffset: Double = 0) {
 
         #if !TARGET_INTERFACE_BUILDER
             plot.setup() // Only init the animations for plots if we are not in IB
         #endif
 
-        plot.createPlotPoints(numberOfPoints: dataSource!.numberOfPoints(), range: range) // TODO: removed forced unwrap
+        plot.createPlotPoints(numberOfPoints: dataSource!.numberOfPoints(), range: range, zeroValueOffset: zeroValueOffset) // TODO: removed forced unwrap
 
         // If we are not animating on startup then just set all the plot positions to their respective values
         if(!shouldAnimateOnStartup) {
@@ -836,7 +846,7 @@ import UIKit
 // MARK: Events
 // ############
 
-// If the active points (the points we can actually see) change, then we need to update the path.
+    // If the active points (the points we can actually see) change, then we need to update the path.
     private func activePointsDidChange() {
 
         let deactivatedPoints = determineDeactivatedPoints()
@@ -924,7 +934,7 @@ import UIKit
         }
     }
 
-// Returns the indices of any points that became inactive (that is, "off screen"). (No order)
+    // Returns the indices of any points that became inactive (that is, "off screen"). (No order)
     private func determineDeactivatedPoints() -> [Int] {
         let prevSet = Set(previousActivePointsInterval)
         let currSet = Set(activePointsInterval)
@@ -934,7 +944,7 @@ import UIKit
         return Array(deactivatedPoints)
     }
 
-// Returns the indices of any points that became active (on screen). (No order)
+    // Returns the indices of any points that became active (on screen). (No order)
     private func determineActivatedPoints() -> [Int] {
         let prevSet = Set(previousActivePointsInterval)
         let currSet = Set(activePointsInterval)
@@ -967,10 +977,10 @@ import UIKit
         }
     }
 
-// Labels
-// TODO in 4.1: refactor all label adding & positioning code.
+    // Labels
+    // TODO in 4.1: refactor all label adding & positioning code.
 
-// Update any labels for any new points that have been activated and deactivated.
+    // Update any labels for any new points that have been activated and deactivated.
     private func updateLabels(deactivatedPoints: [Int], activatedPoints: [Int]) {
 
         guard let ref = self.referenceLines else {
@@ -1052,6 +1062,10 @@ import UIKit
 // ########################
 
     internal func calculatePosition(atIndex index: Int, value: Double) -> CGPoint {
+        return calculatePosition(atIndex: index, value: value, zeroValueOffset: 0)
+    }
+
+    internal func calculatePosition(atIndex index: Int, value: Double, zeroValueOffset: Double = 0) -> CGPoint {
 
         // Set range defaults based on settings:
 
@@ -1069,7 +1083,7 @@ import UIKit
         //                                                     max = the range's current maximum
 
         // Calculate the position on in the view for the value specified.
-        var graphHeight = viewportHeight - topMargin - bottomMargin
+        var graphHeight = viewportHeight - topMargin - bottomMargin - CGFloat(zeroValueOffset)
 
         if let ref = self.referenceLines {
             if(ref.shouldShowLabels && ref.dataPointLabelFont != nil) {
@@ -1099,7 +1113,7 @@ import UIKit
         return CGRect(x: 0, y: 0, width: viewportWidth, height: viewportHeight)
     }
 
-// Update any paths with the new path based on visible data points.
+    // Update any paths with the new path based on visible data points.
     internal func updatePaths() {
 
         zeroYPosition = calculatePosition(atIndex: 0, value: self.range.min).y

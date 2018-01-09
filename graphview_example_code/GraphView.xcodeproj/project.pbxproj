@@ -31,6 +31,7 @@
 		29A590461F0503BD004D219C /* ReferenceLineDrawingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29A590451F0503BD004D219C /* ReferenceLineDrawingView.swift */; };
 		29A590481F05049F004D219C /* LineDrawingLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29A590471F05049F004D219C /* LineDrawingLayer.swift */; };
 		29A5904B1F0509C0004D219C /* Plot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29A5904A1F0509C0004D219C /* Plot.swift */; };
+		4BDF076F20046FAD00B453B0 /* ReferenceLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDF076E20046FAD00B453B0 /* ReferenceLabelView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -60,6 +61,7 @@
 		29A590451F0503BD004D219C /* ReferenceLineDrawingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ReferenceLineDrawingView.swift; path = ../../Classes/Drawing/ReferenceLineDrawingView.swift; sourceTree = "<group>"; };
 		29A590471F05049F004D219C /* LineDrawingLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LineDrawingLayer.swift; path = ../../Classes/Drawing/LineDrawingLayer.swift; sourceTree = "<group>"; };
 		29A5904A1F0509C0004D219C /* Plot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Plot.swift; path = ../../Classes/Plots/Plot.swift; sourceTree = "<group>"; };
+		4BDF076E20046FAD00B453B0 /* ReferenceLabelView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ReferenceLabelView.swift; path = ../../Classes/ReferenceLabelView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +96,7 @@
 		291839A01C72E6A400753A45 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				4BDF076E20046FAD00B453B0 /* ReferenceLabelView.swift */,
 				294A1ACD1CF80CB30070FACD /* ScrollableGraphView.swift */,
 				29A2477A1F09ECC600F75511 /* Reference */,
 				299482F01F060F72007BCDCA /* Protocols */,
@@ -254,6 +257,7 @@
 				29A5904B1F0509C0004D219C /* Plot.swift in Sources */,
 				29A590461F0503BD004D219C /* ReferenceLineDrawingView.swift in Sources */,
 				29A590421F050397004D219C /* GradientDrawingLayer.swift in Sources */,
+				4BDF076F20046FAD00B453B0 /* ReferenceLabelView.swift in Sources */,
 				29A590481F05049F004D219C /* LineDrawingLayer.swift in Sources */,
 				294A1ACE1CF80CB30070FACD /* ScrollableGraphView.swift in Sources */,
 				29A5903E1F05035F004D219C /* BarDrawingLayer.swift in Sources */,
