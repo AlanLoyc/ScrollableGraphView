@@ -4,6 +4,10 @@ import UIKit
 @IBDesignable
 @objc open class ScrollableGraphView: UIScrollView, UIScrollViewDelegate, ScrollableGraphViewDrawingDelegate {
 
+    // MARK: - Notifications
+    open static let CurrentTargetIndexDidChangeNotification = Notification(name: Notification.Name(rawValue: "CurrentTargetIndexDidChangeNotification"))
+    open static let PlotAnimationDidFinishNotification = Notification(name: Notification.Name(rawValue: "PlotAnimationDidFinishNotification"))
+
     // MARK: - Public Properties
     // Use these to customise the graph.
     // #################################
@@ -84,12 +88,11 @@ import UIKit
 
     var targetLine: UIView? = nil
     var targetDot: UIView? = nil
-    var currentTargetIndexDidChangeNotification = Notification(name: Notification.Name(rawValue: "currentTargetIndexDidChangeNotification"))
 
     var currentTargetIndex: Int? = nil {
         didSet { if (oldValue != currentTargetIndex) {
             NotificationCenter.default.post(
-                name: currentTargetIndexDidChangeNotification.name,
+                name: ScrollableGraphView.CurrentTargetIndexDidChangeNotification.name,
                 object: currentTargetIndex)
         }
         }
@@ -296,6 +299,10 @@ import UIKit
                 bottom: 0,
                 right: viewportWidth * (1 - targetLineOffset) - leftmostPointPadding + targetDotSize.width * 0.5)
             addTargetViewLine()
+
+            if (shouldAnimateOnStartup) {
+                self.targetDot?.isHidden = true
+            }
         }
 
         // 7.
@@ -441,7 +448,7 @@ import UIKit
 
             // We're done setting up.
             isInitialSetup = false
-            updateTargetDot()
+            updateTargetDot(delay: 1.5)
             updateTargetLine()
         }
         // Otherwise, the user is just scrolling and we just need to update everything.
@@ -528,14 +535,14 @@ import UIKit
         }
     }
 
-    private func updateTargetDot() {
+    private func updateTargetDot(delay: TimeInterval) {
         if #available(iOS 10.0, *) {
             if let targetDot = self.targetDot {
                 if self.targetDotRefreshTimer != nil {
                     self.targetDotRefreshTimer?.invalidate()
                 }
 
-                self.targetDotRefreshTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false, block: { [weak self] (_) in
+                self.targetDotRefreshTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false, block: { [weak self] (_) in
                     if let targetPoint = self?.targetPoint {
 
                         var dotFrame = targetDot.frame
@@ -559,8 +566,8 @@ import UIKit
         }
     }
 
-// MARK: - Public Methods
-// ######################
+    // MARK: - Public Methods
+    // ######################
 
     public func addPlot(plot: Plot) {
         // If we aren't setup yet, save the plot to be added during setup.
@@ -585,7 +592,7 @@ import UIKit
         }
     }
 
-// Limitation: Can only be used when reloading the same number of data points!
+    // Limitation: Can only be used when reloading the same number of data points!
     public func reload() {
         stopAnimations()
         rangeDidChange()
@@ -594,14 +601,14 @@ import UIKit
         updateLabelsForCurrentInterval()
     }
 
-// The functions for adding plots and reference lines need to be able to add plots
-// both before and after the graph knows its viewport/size.
-// This needs to be the case so we can use it in interface builder as well as
-// just adding it programatically.
-// These functions add the plots and reference lines to the graph.
-// The public functions will either save the plots and reference lines (in the case
-// don't have the required viewport information) or add it directly to the graph
-// (the case where we already know the viewport information).
+    // The functions for adding plots and reference lines need to be able to add plots
+    // both before and after the graph knows its viewport/size.
+    // This needs to be the case so we can use it in interface builder as well as
+    // just adding it programatically.
+    // These functions add the plots and reference lines to the graph.
+    // The public functions will either save the plots and reference lines (in the case
+    // don't have the required viewport information) or add it directly to the graph
+    // (the case where we already know the viewport information).
     private func addPlotToGraph(plot: Plot, activePointsInterval: CountableRange<Int>, zeroValueOffset: Double = 0) {
         plot.graphViewDrawingDelegate = self
         self.plots.append(plot)
@@ -646,11 +653,11 @@ import UIKit
     }
 
 
-// MARK: - Private Methods
-// #######################
+    // MARK: - Private Methods
+    // #######################
 
-// MARK: Layout Calculations
-// #########################
+    // MARK: Layout Calculations
+    // #########################
 
     private func calculateActivePointsInterval() -> CountableRange<Int> {
 
@@ -674,7 +681,7 @@ import UIKit
         return actualMin..<actualMax.advanced(by: 1)
     }
 
-// Calculate the range across all plots.
+    // Calculate the range across all plots.
     private func calculateRange(forActivePointsInterval interval: CountableRange<Int>) -> (min: Double, max: Double) {
 
         // This calculates the range across all plots for the active points.
@@ -717,7 +724,7 @@ import UIKit
         return min
     }
 
-// Calculate the range for a single plot.
+    // Calculate the range for a single plot.
     private func calculateRange(forPlot plot: Plot, forActivePointsInterval interval: CountableRange<Int>) -> (min: Double, max: Double) {
 
         let dataForActivePoints = getData(forPlot: plot, andActiveInterval: interval)
@@ -843,8 +850,8 @@ import UIKit
         return targetPoint
     }
 
-// MARK: Events
-// ############
+    // MARK: Events
+    // ############
 
     // If the active points (the points we can actually see) change, then we need to update the path.
     private func activePointsDidChange() {
@@ -923,7 +930,7 @@ import UIKit
 
     public func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         if let targetLine = self.targetLine {
-            updateTargetDot()
+            updateTargetDot(delay: 1.5)
 
             if let targetPoint = self.targetPoint {
                 let targetOffset = CGPoint.init(
@@ -954,7 +961,7 @@ import UIKit
         return Array(activatedPoints)
     }
 
-// Animations
+    // Animations
 
     private func startAnimations(withStaggerValue stagger: Double = 0) {
         var pointsToAnimate = 0 ..< 0
@@ -1058,8 +1065,8 @@ import UIKit
         return points.filter({ $0 % ref.dataPointLabelsSparsity == 0 })
     }
 
-// MARK: - Drawing Delegate
-// ########################
+    // MARK: - Drawing Delegate
+    // ########################
 
     internal func calculatePosition(atIndex index: Int, value: Double) -> CGPoint {
         return calculatePosition(atIndex: index, value: value, zeroValueOffset: 0)
@@ -1127,6 +1134,18 @@ import UIKit
                     assert (layer.zeroYPosition > 0)
                     layer.updatePath()
                 }
+            }
+        }
+    }
+
+    internal func didFinishAnimation() {
+        let animatingPlots = plots.filter { $0.hasAnimationOngoing() }
+
+        if animatingPlots.isEmpty {
+            updateTargetDot(delay: 0)
+
+            if self.targetDot?.isHidden ?? false {
+                self.targetDot?.isHidden = false
             }
         }
     }
@@ -1210,4 +1229,3 @@ fileprivate class SGVQueue<T> {
         }
     }
 #endif
-

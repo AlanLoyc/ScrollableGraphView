@@ -10,4 +10,5 @@ internal protocol ScrollableGraphViewDrawingDelegate {
     func calculatePosition(atIndex index: Int, value: Double, zeroValueOffset: Double) -> CGPoint
     func currentViewport() -> CGRect
     func updatePaths()
+    func didFinishAnimation()
 }
