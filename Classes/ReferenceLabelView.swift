@@ -20,6 +20,7 @@ class ReferenceLabelView: UIView {
 
     var settings: ReferenceLines = ReferenceLines()
 
+    var borderLayer: CALayer?
     var containerView: UIView?
     var labels = [UILabel]()
 
@@ -32,6 +33,11 @@ class ReferenceLabelView: UIView {
         self.bottomMargin = bottomMargin
 
         self.settings = referenceLineSettings
+
+        borderLayer = CALayer()
+        borderLayer?.frame = CGRect(x: 0, y: 0, width: 1, height: self.frame.height)
+        borderLayer?.backgroundColor = self.settings.referenceLineColor.cgColor
+        self.layer.addSublayer(borderLayer!)
 
         setup()
     }
