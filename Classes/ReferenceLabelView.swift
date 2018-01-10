@@ -54,7 +54,8 @@ class ReferenceLabelView: UIView {
 
         self.frame = frame
 
-        frame.origin = CGPoint(x: 0, y: 0)
+        frame.origin = CGPoint(x: 1, y: 0)
+        frame.size.width -= 1
 
         if let containerView = containerView {
             containerView.removeFromSuperview()
@@ -81,7 +82,7 @@ class ReferenceLabelView: UIView {
         containerView?.frame = containerFrame
 
         // Labels' frame is aligned to reference line's frame in ReferenceLineDrawingView
-        let labelFrame = CGRect(x: 0, y: topMargin, width: self.frame.width, height: self.bounds.size.height - (topMargin + bottomMargin))
+        let labelFrame = CGRect(x: 1, y: topMargin, width: self.frame.width - 1, height: self.bounds.size.height - (topMargin + bottomMargin))
 
         if self.settings.includeMinLabel {
             createLabel(atPosition: self.bounds.size.height - bottomMargin)
