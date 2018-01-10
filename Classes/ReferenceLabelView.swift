@@ -244,5 +244,6 @@ class ReferenceLabelView: UIView {
         self.frame.size.width = viewportWidth
         self.frame.size.height = viewportHeight
         setup()
+        createLabels()
     }
 }
