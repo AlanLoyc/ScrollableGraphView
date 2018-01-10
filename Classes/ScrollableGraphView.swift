@@ -851,6 +851,14 @@ import UIKit
 
                     if let temp = targetPoint {
                         self.currentTargetIndex = plot.allGraphPoints().enumerated().filter({ return temp.x == $0.element.x }).map({ $0.offset }).first
+                    } else {
+                        if let lastPoint = plot.allGraphPoints().last, targetLineCentre.x >= lastPoint.x {
+                            targetPoint = lastPoint
+                            self.currentTargetIndex = plot.allGraphPoints().count - 1
+                        } else if let firstPoint = plot.allGraphPoints().first, targetLineCentre.x <= 0 {
+                            targetPoint = firstPoint
+                            self.currentTargetIndex = 0
+                        }
                     }
                 }
             }
