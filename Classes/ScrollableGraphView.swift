@@ -64,6 +64,9 @@ import UIKit
     /// Whether or not the graph should animate to their positions when the graph is first displayed.
     @IBInspectable open var shouldAnimateOnStartup: Bool = true
 
+    /// The delay between each data points are animated, e.g. if this is set at 1, point 2 will be animated 1 sec after point 1 is animated, a value of 0 indicates all points will be animated at the same time
+    @IBInspectable open var interPointAnimationDelay: Double = 0.15
+
     @IBInspectable open var shouldReferenceLineShowAsBackgroundView: Bool = true
 
     /// Whether or noth the graph should a target line in middle
@@ -449,7 +452,7 @@ import UIKit
             setup()
 
             if(shouldAnimateOnStartup) {
-                startAnimations(withStaggerValue: 0.15)
+                startAnimations(withStaggerValue: interPointAnimationDelay)
             }
 
             // We're done setting up.
@@ -619,7 +622,7 @@ import UIKit
         plot.graphViewDrawingDelegate = self
         self.plots.append(plot)
         initPlot(plot: plot, activePointsInterval: activePointsInterval, zeroValueOffset: zeroValueOffset)
-        startAnimations(withStaggerValue: 0.15)
+        startAnimations(withStaggerValue: interPointAnimationDelay)
     }
 
 
