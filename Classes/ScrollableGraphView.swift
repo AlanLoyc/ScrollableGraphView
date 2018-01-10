@@ -661,6 +661,26 @@ import UIKit
         queuedPlots.enqueue(element: plot)
     }
 
+    public func scrollToPoint(atIndex index: Int) {
+        if shouldShowTargetLine && index >= 0, let targetLine = targetLine {
+            let targetPlot = plots.filter { $0.identifier == targetLineIdentifier }.first
+
+            if let targetPlot = targetPlot {
+                let plotPoints = targetPlot.allGraphPoints()
+
+                guard plotPoints.count > index else {
+                    return
+                }
+
+                let targetPoint: GraphPoint = plotPoints[index]
+                let targetOffset = CGPoint.init(
+                    x: targetPoint.location.x - targetLine.center.x,
+                    y: contentOffset.y)
+                contentOffset.x = targetOffset.x
+                updateTargetDot(delay: 0)
+            }
+        }
+    }
 
     // MARK: - Private Methods
     // #######################
