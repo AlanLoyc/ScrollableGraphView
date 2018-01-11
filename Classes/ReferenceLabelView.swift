@@ -35,7 +35,7 @@ class ReferenceLabelView: UIView {
         self.settings = referenceLineSettings
 
         borderLayer = CALayer()
-        borderLayer?.frame = CGRect(x: 0, y: 0, width: 1, height: self.frame.height)
+        borderLayer?.frame = CGRect(x: 0, y: 0, width: self.settings.referenceLineThickness, height: self.frame.height)
         borderLayer?.backgroundColor = self.settings.referenceLineColor.cgColor
         self.layer.addSublayer(borderLayer!)
 
@@ -54,7 +54,7 @@ class ReferenceLabelView: UIView {
 
         self.frame = frame
 
-        frame.origin = CGPoint(x: 1, y: 0)
+        frame.origin = CGPoint(x: self.settings.referenceLineThickness, y: 0)
         frame.size.width -= 1
 
         if let containerView = containerView {
@@ -78,7 +78,7 @@ class ReferenceLabelView: UIView {
         // Reset containerView's frame
         let containerSize = CGSize(width: self.frame.size.width,
                                    height: self.frame.size.height - self.settings.referenceLineThickness * 2)
-        let containerFrame = CGRect(origin: CGPoint(x: 0, y: self.settings.referenceLineThickness), size: containerSize)
+        let containerFrame = CGRect(origin: CGPoint(x: self.settings.referenceLineThickness, y: self.settings.referenceLineThickness), size: containerSize)
         containerView?.frame = containerFrame
 
         // Labels' frame is aligned to reference line's frame in ReferenceLineDrawingView
@@ -165,11 +165,9 @@ class ReferenceLabelView: UIView {
 
             var containerFrame = containerView.frame
             let labelHeight = maxLabelSize().height
-            let xAxisAdjust = self.settings.dataPointLabelTopMargin + self.settings.dataPointLabelBottomMargin + (self.settings.dataPointLabelFont?.pointSize ?? 0)
 
             if !self.settings.includeMinLabel {
-                //let heightAdjust = labelHeight + xAxisAdjust + self.settings.referenceLineThickness
-                let heightAdjust = xAxisAdjust + labelHeight / 2
+                let heightAdjust = self.settings.dataPointLabelTopMargin + self.settings.dataPointLabelBottomMargin + (self.settings.dataPointLabelFont?.pointSize ?? 0) + labelHeight
                 containerFrame.size.height -= heightAdjust
 
                 containerView.frame = containerFrame
